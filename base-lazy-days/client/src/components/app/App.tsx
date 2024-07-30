@@ -1,5 +1,8 @@
 import { ChakraProvider } from "@chakra-ui/react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { QueryCache } from "@tanstack/react-query";
 
 import { Home } from "./Home";
 import { Loading } from "./Loading";
@@ -12,11 +15,15 @@ import { AllStaff } from "@/components/staff/AllStaff";
 import { Treatments } from "@/components/treatments/Treatments";
 import { Signin } from "@/components/user/Signin";
 import { UserProfile } from "@/components/user/UserProfile";
+import { queryClient } from "@/react-query/queryClient";
 import { theme } from "@/theme";
+
 
 export function App() {
   return (
     <ChakraProvider theme={theme}>
+      <QueryClientProvider client = {queryClient}>
+
       <AuthContextProvider>
         <Loading />
         <BrowserRouter>
@@ -32,6 +39,8 @@ export function App() {
         </BrowserRouter>
         <ToastContainer />
       </AuthContextProvider>
+      <ReactQueryDevtools />
+      </QueryClientProvider>
     </ChakraProvider>
   );
 }
