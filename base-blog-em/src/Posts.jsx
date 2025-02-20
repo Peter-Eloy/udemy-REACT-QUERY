@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 import { fetchPosts, deletePost, updatePost } from "./api";
 import { PostDetail } from "./PostDetail";
@@ -12,7 +12,11 @@ export function Posts() {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
-    mutationFN: (postId) => deletePost(postId),
+    mutationFn: (postId) => deletePost(postId),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (postId) => updatePost(postId),
   });
 
   useEffect(() => {
@@ -28,13 +32,18 @@ export function Posts() {
   const { data, isError, error, isLoading } = useQuery({
     queryKey: ["posts", currentPage],
     queryFn: () => fetchPosts(currentPage),
-    staleTime: 2000,
+    staleTime: 2000, // 2 seconds
   });
   if (isLoading) {
-    return <h3>..is Loading</h3>;
+    return <h3>Loading...</h3>;
   }
   if (isError) {
-    return <h3>..is Error</h3>;
+    return (
+      <>
+        <h3>Oops, something went wrong</h3>
+        <p>{error.toString()}</p>
+      </>
+    );
   }
 
   return (
@@ -44,7 +53,11 @@ export function Posts() {
           <li
             key={post.id}
             className="post-title"
-            onClick={() => setSelectedPost(post)}
+            onClick={() => {
+              deleteMutation.reset();
+              updateMutation.reset();
+              setSelectedPost(post);
+            }}
           >
             {post.title}
           </li>
@@ -59,7 +72,7 @@ export function Posts() {
         >
           Previous page
         </button>
-        <span>Page {currentPage + 1}</span>
+        <span>Page {currentPage}</span>
         <button
           disabled={currentPage >= maxPostPage}
           onClick={() => {
@@ -71,7 +84,11 @@ export function Posts() {
       </div>
       <hr />
       {selectedPost && (
-        <PostDetail post={selectedPost} deleteMutation={deleteMutation} />
+        <PostDetail
+          post={selectedPost}
+          deleteMutation={deleteMutation}
+          updateMutation={updateMutation}
+        />
       )}
     </>
   );
